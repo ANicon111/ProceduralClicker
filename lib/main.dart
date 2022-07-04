@@ -29,7 +29,9 @@ class _FrameState extends State<Frame> {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      body: Game(),
+      body: Game(
+        refreshRate: 60,
+      ),
     );
   }
 }
