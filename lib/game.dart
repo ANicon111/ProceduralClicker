@@ -160,7 +160,7 @@ class _GameState extends State<Game> {
               animationDuration: const Duration(milliseconds: 500),
               offset: Offset((landscape ? i : j) * 33.3 - 0.83,
                   (landscape ? j : i) * 33.3 - 6.5),
-              gestureDetector: GestureDetector(
+              overlay: GestureDetector(
                 onTap: () {
                   characterTapDetector(i, j);
                 },
@@ -198,16 +198,29 @@ class _GameState extends State<Game> {
         } else {
           list.add(
             ContainrrElement(
-              name: "assets/objects/desk",
               size: const Size(33.3, 33.3),
               animationDuration: const Duration(milliseconds: 500),
               offset: Offset(
                   (landscape ? i : j) * 33.3, (landscape ? j : i) * 33.3),
-              gestureDetector: GestureDetector(
-                onTap: () {
-                  characterTapDetector(i, j);
-                },
-              ),
+              overlay: LayoutBuilder(builder: (context, constraints) {
+                return MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: () {
+                      characterTapDetector(i, j);
+                    },
+                    child: SizedBox(
+                      width: constraints.maxWidth,
+                      height: constraints.maxHeight,
+                      child: Center(
+                          child: Icon(
+                        Icons.add_circle_outline,
+                        size: constraints.maxWidth / 3,
+                      )),
+                    ),
+                  ),
+                );
+              }),
             ),
           );
         }
@@ -228,125 +241,3 @@ class _GameState extends State<Game> {
     setState(() {});
   }
 }
-
-/*class Painter extends CustomPainter {
-  final int frame;
-  final List<List<WorkerData?>> workerGrid;
-  bool landscape;
-
-  Painter(this.frame, this.assets, this.workerGrid, this.landscape);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    double pixel = size.shortestSide / 1080;
-    if (assets.isInited) {
-      image(
-          canvas, "backgrounds-placeholder", 1, 0, 0, size.width, size.height);
-      for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 3; j++) {
-          if (workerGrid[i][j] != null) {
-            desk(
-              canvas,
-              landscape ? i : j,
-              landscape ? j : i,
-              pixel,
-              workerGrid[i][j]!,
-            );
-          }
-        }
-      }
-    }
-    if (kDebugMode) {
-      final textPainter = TextPainter(
-        text: TextSpan(
-          text: frame.toString(),
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 30 * pixel,
-          ),
-        ),
-        textDirection: TextDirection.ltr,
-      );
-      textPainter.layout(
-        minWidth: 0,
-        maxWidth: size.width,
-      );
-      textPainter.paint(canvas, Offset(size.width - textPainter.width, 0));
-    }
-  }
-
-  void desk(Canvas canvas, int i, int j, double pixel, WorkerData worker) {
-    workerPainter(
-      canvas,
-      i * 360 * pixel,
-      j * 360 * pixel,
-      pixel / 2.22222,
-      "objects-desk",
-      "animations-action",
-      worker,
-    );
-  }
-
-  void workerPainter(
-    Canvas canvas,
-    double x,
-    double y,
-    double scale,
-    String desk,
-    String animation,
-    WorkerData worker,
-  ) {
-    image(canvas, worker.character, 1, x + 250 * scale, y + 100 * scale,
-        300 * scale, 300 * scale);
-    image(canvas, desk, 1, x + 150 * scale, y + 250 * scale, 500 * scale,
-        500 * scale);
-    image(canvas, animation, 15, x - 0 * scale, y - 135 * scale, 800 * scale,
-        800 * scale);
-    image(canvas, worker.rightArm, 1, x + 240 * scale, y + 250 * scale,
-        140 * scale, 200 * scale);
-    image(canvas, worker.leftArm, 1, x + 420 * scale, y + 250 * scale,
-        140 * scale, 200 * scale);
-    image(canvas, worker.hat, 1, x + 280 * scale, y + scale * 10, 240 * scale,
-        240 * scale);
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: worker.cookiesPerSecond < 1e8
-            ? worker.cookiesPerSecond.toStringAsFixed(0)
-            : worker.cookiesPerSecond
-                .toStringAsExponential(5)
-                .replaceAll("+", ""),
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 64 * scale,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout(
-        minWidth: 0,
-        maxWidth: 1000 * scale,
-      );
-    textPainter.paint(canvas,
-        Offset(x + 400 * scale - textPainter.size.width / 2, y + 470 * scale));
-  }
-
-  void image(Canvas canvas, String name, int frameTimeMultiplier, double x,
-      double y, double w, double h) {
-    if (assets.get(name, frame ~/ frameTimeMultiplier) != null) {
-      paintImage(
-        canvas: canvas,
-        rect: Rect.fromLTWH(x, y, w, h),
-        image: assets.get(name, frame ~/ frameTimeMultiplier)!,
-        fit: BoxFit.cover,
-        repeat: ImageRepeat.noRepeat,
-        scale: 1e-100,
-        alignment: Alignment.center,
-        flipHorizontally: false,
-        filterQuality: FilterQuality.low,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => true;
-}
-*/

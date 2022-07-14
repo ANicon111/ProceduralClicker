@@ -8,7 +8,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/services.dart';
 
 class ContainrrElement {
-  final String name;
+  final String? name;
   // The base name of the element: if the asset is named assets/images/image-06@02.png the base name is assets/images/image
   // Asset names are to be created using this nameing scheme: <BASENAME>+[-VARIANTNUMBER]+[@FRAMENUMBER]+<.EXTENSION>
   final Size size;
@@ -29,11 +29,11 @@ class ContainrrElement {
   // Makes x and y coordinates relative to the center: x=0, y=0 means the element is centered
   final ImageRepeat repeat;
   // Sets the repetition for the painter
-  final GestureDetector? gestureDetector;
+  final Widget? overlay;
   // Element action
 
   ContainrrElement({
-    required this.name,
+    this.name,
     required this.size,
     this.variant = 0,
     this.firstAnimationFrame = 0,
@@ -42,7 +42,7 @@ class ContainrrElement {
     this.offset = const Offset(0, 0),
     this.centered = false,
     this.repeat = ImageRepeat.noRepeat,
-    this.gestureDetector,
+    this.overlay,
   });
 }
 
@@ -147,7 +147,8 @@ class _ContainrrState extends State<Containrr> {
     assetsLoaded = true;
   }
 
-  ui.Image? getAsset(String name, [int variant = 0, int frame = 0]) {
+  ui.Image? getAsset(String? name, [int variant = 0, int frame = 0]) {
+    if (name == null) return null;
     return assets[name]?[variant]?[frame];
   }
 
@@ -157,9 +158,9 @@ class _ContainrrState extends State<Containrr> {
     if (widget.relativeSize) {
       relativeValue = widget.size.shortestSide / 100;
     }
-    List<Widget> gestureDetectors = [];
+    List<Widget> overlays = [];
     for (ContainrrElement element in widget.elements) {
-      if (element.gestureDetector != null) {
+      if (element.overlay != null) {
         double centerValueX = 0;
         double centerValueY = 0;
         if (element.centered) {
@@ -168,14 +169,14 @@ class _ContainrrState extends State<Containrr> {
           centerValueY =
               widget.size.height / 2 - element.size.height * relativeValue / 2;
         }
-        gestureDetectors.add(
+        overlays.add(
           Positioned(
             top: element.offset.dy * relativeValue + centerValueY,
             left: element.offset.dx * relativeValue + centerValueX,
             child: SizedBox(
               width: element.size.width * relativeValue,
               height: element.size.height * relativeValue,
-              child: element.gestureDetector,
+              child: element.overlay,
             ),
           ),
         );
@@ -208,7 +209,7 @@ class _ContainrrState extends State<Containrr> {
         size: widget.size,
         painter: Painter(
             widget.elements, getAsset, widget.relativeSize, refreshTime),
-        child: Stack(children: gestureDetectors),
+        child: Stack(children: overlays),
       ),
     );
   }
