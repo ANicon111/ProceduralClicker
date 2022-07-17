@@ -8,41 +8,43 @@ import 'dart:ui' as ui;
 import 'package:flutter/services.dart';
 
 class ContainrrElement {
-  final String? name;
-  // The base name of the element: if the asset is named assets/images/image-06@02.png the base name is assets/images/image
-  // Asset names are to be created using this nameing scheme: <BASENAME>+[-VARIANTNUMBER]+[@FRAMENUMBER]+<.EXTENSION>
-  final Size size;
-  // Element size in pixels (or hundredths of the smallest screen size if the relativeSize is set to true in the Containrr)
-  final int variant;
-  // The element variant: if the asset is named assets/images/image-06@02.png the variant is 6
-  final int firstAnimationFrame;
-  // First animation frame to be played; must be lower or equal to lastAnimationFrame and lower than the total number of frames
-  final int lastAnimationFrame;
-  // Last animation frame to be played; must be greater or equal to firstAnimationFrame and lower than the total number of frames
-  // -1 means the animation is played until the end
-  final Duration animationDuration;
-  // The time in which all frames in interval [firstAnimationFrame,lastAnimationFrame] are played
-  final Offset offset;
-  // Element offset in pixels (or hundredths of the smallest screen size if the relativeSize is set to true in the Containrr)
-  // The offset is calculated from the top-left of the screen if centered is not set to true
-  final bool centered;
-  // Makes x and y coordinates relative to the center: x=0, y=0 means the element is centered
-  final ImageRepeat repeat;
-  // Sets the repetition for the painter
-  final Widget? overlay;
-  // Element action
+  String? name;
+  Size size;
+  int variant;
+  int firstAnimationFrame;
+  int lastAnimationFrame;
+  Duration animationDuration;
+  Offset offset;
+  bool centered;
+  ImageRepeat repeat;
+  Widget? overlay;
 
   ContainrrElement({
     this.name,
+    // The base name of the element: if the asset is named assets/images/image-06@02.png the base name is assets/images/image
+    // Asset names are to be created using this nameing scheme: <BASENAME>+[-VARIANTNUMBER]+[@FRAMENUMBER]+<.EXTENSION>
+    // Leave empty to only add the overlay
     required this.size,
+    // Element size in pixels (or hundredths of the smallest screen size if the relativeSize is set to true in the Containrr)
     this.variant = 0,
-    this.firstAnimationFrame = 0,
-    this.lastAnimationFrame = 0,
+    // The element variant: if the asset is named assets/images/image-06@02.png the variant is 6
+    this.firstAnimationFrame = -1,
+    // First animation frame to be played; must be lower or equal to lastAnimationFrame and lower than the total number of frames
+    // -1 means the animation is played from the beginning
+    this.lastAnimationFrame = -1,
+    // Last animation frame to be played; must be greater or equal to firstAnimationFrame and lower than the total number of frames
+    // -1 means the animation is played until the end
     this.animationDuration = const Duration(seconds: 1),
+    // The time in which all frames in interval [firstAnimationFrame,lastAnimationFrame] are played
     this.offset = const Offset(0, 0),
+    // Element offset in pixels (or hundredths of the smallest screen size if the relativeSize is set to true in the Containrr)
+    // The offset is calculated from the top-left of the screen if centered is not set to tru
     this.centered = false,
+    // Makes x and y coordinates relative to the center: x=0, y=0 means the element is centered
     this.repeat = ImageRepeat.noRepeat,
+    // Sets the repetition for the painter
     this.overlay,
+    // Standard widget nested in a SizedBox with the same size and position as the element
   });
 }
 
@@ -152,6 +154,16 @@ class _ContainrrState extends State<Containrr> {
     return assets[name]?[variant]?[frame];
   }
 
+  int getLastFrame(String? name, [int variant = 0]) {
+    if (name == null) return 0;
+    return assets[name]?[variant]?.keys.last ?? 0;
+  }
+
+  int getFirstFrame(String? name, [int variant = 0]) {
+    if (name == null) return 0;
+    return assets[name]?[variant]?.keys.first ?? 0;
+  }
+
   @override
   Widget build(BuildContext context) {
     double relativeValue = 1;
@@ -207,8 +219,8 @@ class _ContainrrState extends State<Containrr> {
       height: widget.size.height,
       child: CustomPaint(
         size: widget.size,
-        painter: Painter(
-            widget.elements, getAsset, widget.relativeSize, refreshTime),
+        painter: Painter(widget.elements, getAsset, getLastFrame, getFirstFrame,
+            widget.relativeSize, refreshTime),
         child: Stack(children: overlays),
       ),
     );
@@ -218,10 +230,19 @@ class _ContainrrState extends State<Containrr> {
 class Painter extends CustomPainter {
   final List<ContainrrElement> elements;
   final Function getAsset;
+  final Function getLastFrame;
+  final Function getFirstFrame;
   final bool relativeSize;
   final double refreshTime;
 
-  Painter(this.elements, this.getAsset, this.relativeSize, this.refreshTime);
+  Painter(
+    this.elements,
+    this.getAsset,
+    this.getLastFrame,
+    this.getFirstFrame,
+    this.relativeSize,
+    this.refreshTime,
+  );
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -239,6 +260,15 @@ class Painter extends CustomPainter {
             size.height / 2 - element.size.height * relativeValue / 2;
       }
 
+      if (element.firstAnimationFrame == -1) {
+        element.firstAnimationFrame =
+            getFirstFrame(element.name, element.variant);
+      }
+
+      if (element.lastAnimationFrame == -1) {
+        element.lastAnimationFrame =
+            getLastFrame(element.name, element.variant);
+      }
       int frameNumber =
           1 + element.lastAnimationFrame - element.firstAnimationFrame;
       int frameTimeInMicroseconds =
