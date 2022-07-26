@@ -1,7 +1,7 @@
 import 'package:proceduralclicker/game.dart';
 
 class Shop {
-  final List<WorkerData> _workers = [];
+  final List<WorkerData> workers = [];
   bool isInited = false;
 
   Shop() {
@@ -46,40 +46,40 @@ class Shop {
       "assets/hats/flower",
     ];
     const List<String> leftArms = [
-      "assets/arms/leftplaceholder",
-      "assets/arms/leftplaceholder",
-      "assets/arms/leftplaceholder",
-      "assets/arms/leftplaceholder",
-      "assets/arms/leftplaceholder",
-      "assets/arms/leftplaceholder",
-      "assets/arms/leftplaceholder",
-      "assets/arms/leftplaceholder",
-      "assets/arms/leftplaceholder",
-      "assets/arms/leftplaceholder",
-      "assets/arms/leftplaceholder",
-      "assets/arms/leftplaceholder",
-      "assets/arms/leftplaceholder",
-      "assets/arms/leftplaceholder",
-      "assets/arms/leftplaceholder",
-      "assets/arms/leftplaceholder",
+      "assets/arms/leftgoblin",
+      "assets/arms/leftantena",
+      "assets/arms/leftcloud",
+      "assets/arms/leftgrapple",
+      "assets/arms/leftleaf",
+      "assets/arms/leftmagic",
+      "assets/arms/leftpirate",
+      "assets/arms/leftrobotclaw",
+      "assets/arms/leftstars",
+      "assets/arms/leftstickmin",
+      "assets/arms/leftrobotdrill",
+      "assets/arms/leftvine",
+      "assets/arms/lefttree",
+      "assets/arms/leftrobotdiamonddrill",
+      "assets/arms/tankie",
+      "assets/arms/ancom",
     ];
     const List<String> rightArms = [
-      "assets/arms/rightplaceholder",
-      "assets/arms/rightplaceholder",
-      "assets/arms/rightplaceholder",
-      "assets/arms/rightplaceholder",
-      "assets/arms/rightplaceholder",
-      "assets/arms/rightplaceholder",
-      "assets/arms/rightplaceholder",
-      "assets/arms/rightplaceholder",
-      "assets/arms/rightplaceholder",
-      "assets/arms/rightplaceholder",
-      "assets/arms/rightplaceholder",
-      "assets/arms/rightplaceholder",
-      "assets/arms/rightplaceholder",
-      "assets/arms/rightplaceholder",
-      "assets/arms/rightplaceholder",
-      "assets/arms/rightplaceholder",
+      "assets/arms/rightgoblin",
+      "assets/arms/rightantena",
+      "assets/arms/rightcloud",
+      "assets/arms/rightgrapple",
+      "assets/arms/rightleaf",
+      "assets/arms/rightmagic",
+      "assets/arms/rightpirate",
+      "assets/arms/rightrobotclaw",
+      "assets/arms/rightstars",
+      "assets/arms/rightstickmin",
+      "assets/arms/rightrobotdrill",
+      "assets/arms/rightvine",
+      "assets/arms/righttree",
+      "assets/arms/rightrobotdiamonddrill",
+      "assets/arms/ancap",
+      "assets/arms/fash",
     ];
     double value = 100;
     int index = 0;
@@ -87,7 +87,7 @@ class Shop {
       for (int hi = 0; hi < hats.length; hi++) {
         for (int li = 0; li < leftArms.length; li++) {
           for (int ri = 0; ri < rightArms.length; ri++) {
-            _workers.add(WorkerData(
+            workers.add(WorkerData(
               index++,
               value / 100,
               value,
@@ -113,9 +113,9 @@ class Shop {
     }
 
     int i = 0;
-    while (_workers[i + 1].price <= wealth) {
+    while (workers[i + 1].price <= wealth) {
       i++;
     }
-    return _workers[i];
+    return workers[i];
   }
 }

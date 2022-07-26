@@ -1,9 +1,11 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:proceduralclicker/definitions.dart';
 import 'package:proceduralclicker/rendering.dart';
 import 'package:proceduralclicker/logic.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class WorkerData {
   String character, leftArm, rightArm, hat;
@@ -20,7 +22,7 @@ class WorkerData {
   ]);
   @override
   String toString() =>
-      "Id:$id - Price:$price - Generation:$cookiesPerSecond - $character - $leftArm - $rightArm - $hat";
+      "$id-$cookiesPerSecond-$price-$character-$hat-$leftArm-$rightArm";
 }
 
 class Game extends StatefulWidget {
@@ -37,20 +39,69 @@ class _GameState extends State<Game> {
   Shop shop = Shop();
   int frame = 0;
   double cookies = 0;
-  Timer? cookieTimer;
+  Timer? cookieTimer, saveTimer;
+  SharedPreferences? sharedPreferences;
+  bool loadedSave = false;
+
+  void stateSaver() async {
+    sharedPreferences ??= await SharedPreferences.getInstance();
+    if (sharedPreferences != null && !loadedSave) {
+      if (sharedPreferences!.containsKey("workers")) {
+        List<String> workerData = sharedPreferences!.getStringList("workers")!;
+        for (int i = 0; i < 4; i++) {
+          for (int j = 0; j < 3; j++) {
+            if (workerData[i * 3 + j] != "") {
+              List<String> w = workerData[i * 3 + j].split("-");
+              workers[i][j] = WorkerData(
+                int.parse(w[0]),
+                double.parse(w[1]),
+                double.parse(w[2]),
+                w[3],
+                w[4],
+                w[5],
+                w[6],
+              );
+            }
+          }
+        }
+        cookies = sharedPreferences!.getDouble("cookies")!;
+      }
+      loadedSave = true;
+    }
+    if (loadedSave) {
+      List<String> workerData = List.filled(12, "");
+      for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 3; j++) {
+          if (workers[i][j] != null) {
+            workerData[i * 3 + j] = workers[i][j]!.toString();
+          }
+        }
+      }
+      sharedPreferences!.setStringList("workers", workerData);
+      sharedPreferences!.setDouble("cookies", cookies);
+      if (kDebugMode) {
+        print("saved!");
+      }
+    }
+  }
 
   @override
   void initState() {
-    if (cookieTimer != null) cookieTimer!.cancel();
+    cookieTimer?.cancel();
     cookieTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
       for (var elem in workers) {
         for (var worker in elem) {
           if (worker != null) {
             cookies += worker.cookiesPerSecond / 10;
-            setState(() {});
           }
         }
       }
+      setState(() {});
+    });
+    saveTimer?.cancel();
+    stateSaver();
+    saveTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      stateSaver();
     });
     super.initState();
   }
@@ -282,6 +333,7 @@ class _GameState extends State<Game> {
             workers[i][j]!.price * 1.01 <= availableWorker.price)) {
       cookies -= availableWorker.price;
       workers[i][j] = availableWorker;
+      stateSaver();
     }
     setState(() {});
   }

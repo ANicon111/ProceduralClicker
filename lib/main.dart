@@ -14,6 +14,7 @@ class App extends StatelessWidget {
       home: const Frame(),
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
+      themeMode: ThemeMode.dark,
     );
   }
 }
