@@ -269,7 +269,7 @@ class _GameState extends State<Game> {
                   (landscape ? j : i) * 33.3),
             ),
           );
-          if (cookies > 1.1 * workers[i][j]!.price &&
+          if (cookies > 1.01 * workers[i][j]!.price &&
               workers[i][j]!.id < 65536) {
             list.add(
               ContainrrElement(
